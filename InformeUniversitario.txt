@@ -1,0 +1,30 @@
+Informe del desarrollo de la pantalla y formulario en modo oscuro
+
+En este documento se describe el trabajo realizado para implementar una pantalla principal y un formulario de presupuesto en una aplicación Android con Jetpack Compose, cumpliendo los requisitos de accesibilidad y diseño en modo oscuro.
+
+Se forzó el modo oscuro en toda la aplicación modificando el tema global `ComposeNavegacionAppTheme` para que utilice siempre la paleta oscura. Esto asegura que todas las pantallas, componentes y tarjetas usen colores coherentes en entornos de poca luz y que no dependan de la configuración del sistema.
+
+La pantalla principal fue adaptada para usar los estilos tipográficos de `MaterialTheme.typography`, de modo que el tamaño del texto se ajuste automáticamente cuando el usuario cambia la escala de fuente en los ajustes de accesibilidad del sistema. Además se reemplazó la navegación basada en la librería de Navigation por una navegación simple basada en estado interno (enum `Screen`) para evitar dependencias adicionales en el alcance del ejercicio.
+
+Se añadió un formulario de presupuesto accesible y responsivo llamado `BudgetFormScreen`. El formulario contiene campos de texto para nombre, monto, categoría y notas, y dispone de botones para Guardar y Cancelar organizados con `Row` y `Column` utilizando espaciado (`Spacer` y `Arrangement.spacedBy`) para mantener una disposición clara en diferentes tamaños de pantalla. Los TextField usan los colores del tema y los textos usan estilos de `MaterialTheme` para respetar el escalado del sistema.
+
+Se realizaron los siguientes cambios técnicos relevantes en el código fuente:
+
+- En `ui/theme/Theme.kt` se forzó `darkTheme = true` en `ComposeNavegacionAppTheme` para aplicar siempre el tema oscuro.
+- En `MainActivity.kt` se implementó un `AppNavHost` simple por estado, se incorporó `BudgetFormScreen` y se ajustaron los composables para usar `MaterialTheme.colorScheme` y `MaterialTheme.typography` en títulos, botones y texto de la interfaz.
+- Se actualizó la llamada a `LinearProgressIndicator` para usar la sobrecarga recomendada y evitar advertencias de uso obsoleto.
+
+Pruebas realizadas:
+
+Se probó la interfaz en emuladores con distintos tamaños de pantalla (teléfono pequeño y tableta) y en ambas orientaciones (portrait y landscape) para verificar que el layout se adapta correctamente. Se comprobó manualmente que al aumentar la escala de fuente en las opciones de accesibilidad los textos (título, campos y botones) se redimensionan respetando las directrices de Material Design y sin truncarse.
+
+Capturas de pantalla (pegue las imágenes a continuación, deje líneas en blanco para cada captura):
+
+
+
+
+Observaciones y recomendaciones finales:
+
+La aplicación ahora muestra un único tema oscuro consistente en todas las pantallas y evita overlays de accesibilidad: la pantalla accesible ocupa todo el espacio disponible dentro del layout principal. Para mejorar aún más la accesibilidad se puede añadir soporte de lectura por voz (TalkBack), descripciones accesibles en íconos y validación de campos en el formulario con mensajes de error claros. También se puede reincorporar la navegación con la librería Navigation Compose si se desea gestión de back stack más avanzada.
+
+Fin del informe.
