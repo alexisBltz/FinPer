@@ -1,6 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package com.example.composenavegacionapp
 package com.example.composenavegacionapp
 
 import android.os.Bundle
@@ -21,4 +18,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-import androidx.compose.ui.text.font.FontWeight
