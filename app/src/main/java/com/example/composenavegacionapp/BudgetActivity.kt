@@ -5,24 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.composenavegacionapp.screens.BudgetListScreen
 import com.example.composenavegacionapp.ui.theme.ComposeNavegacionAppTheme
-import com.example.composenavegacionapp.navigation.AppNavHost
 import com.example.composenavegacionapp.viewmodel.BudgetViewModel
-import com.example.composenavegacionapp.viewmodel.TransactionViewModel
 
-class MainActivity : ComponentActivity() {
+class BudgetActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ComposeNavegacionAppTheme {
-                val budgetViewModel: BudgetViewModel = viewModel()
-                val transactionViewModel: TransactionViewModel = viewModel()
-                AppNavHost(
-                    budgetViewModel = budgetViewModel,
-                    transactionViewModel = transactionViewModel
-                )
+                val viewModel: BudgetViewModel = viewModel()
+                BudgetListScreen(viewModel = viewModel)
             }
         }
     }
 }
+

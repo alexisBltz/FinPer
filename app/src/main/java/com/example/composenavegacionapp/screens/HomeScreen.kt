@@ -19,10 +19,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.composenavegacionapp.components.TransactionItem
+import com.example.composenavegacionapp.viewmodel.BudgetViewModel
+import com.example.composenavegacionapp.viewmodel.TransactionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeNavHost(onNavigateToDetails: (String) -> Unit, onOpenBudget: () -> Unit) {
+fun HomeNavHost(
+    budgetViewModel: BudgetViewModel,
+    transactionViewModel: TransactionViewModel,
+    onNavigateToDetails: (String) -> Unit, 
+    onOpenBudget: () -> Unit
+) {
     var selectedIndex by remember { mutableStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -65,17 +72,11 @@ fun HomeNavHost(onNavigateToDetails: (String) -> Unit, onOpenBudget: () -> Unit)
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedIndex) {
                 0 -> HomeScreen(onNavigateToDetails = onNavigateToDetails)
-                1 -> TransactionsScreen(onNavigateToDetails = onNavigateToDetails)
-                2 -> BudgetFormScreen(onSave = {
-                    // mostrar snackbar local y volver a inicio
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Presupuesto guardado")
-                    }
-                    selectedIndex = 0
-                }, onCancel = {
-                    scope.launch { snackbarHostState.showSnackbar("Acción cancelada") }
-                    selectedIndex = 0
-                })
+                1 -> TransactionsScreen(
+                    viewModel = transactionViewModel,
+                    onNavigateToDetails = onNavigateToDetails
+                )
+                2 -> BudgetListScreen(viewModel = budgetViewModel)
             }
         }
     }
