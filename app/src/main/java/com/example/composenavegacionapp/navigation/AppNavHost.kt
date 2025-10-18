@@ -25,6 +25,7 @@ fun AppNavHost(
             budgetViewModel = budgetViewModel,
             transactionViewModel = transactionViewModel,
             onNavigateToDetails = { data -> screen = Screen.Details(data) },
+            onLogoClicked = { budgetViewModel.notifyLogoClicked() },
             onOpenBudget = { screen = Screen.BudgetForm }
         )
         is Screen.Details -> DetailScreen(data = s.data, onBack = { screen = Screen.Home })

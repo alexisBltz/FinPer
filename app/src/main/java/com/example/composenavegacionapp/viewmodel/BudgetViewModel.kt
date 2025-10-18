@@ -1,6 +1,9 @@
 package com.example.composenavegacionapp.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.composenavegacionapp.data.Budget
 
@@ -65,6 +68,14 @@ class BudgetViewModel : ViewModel() {
 
     fun getBudgetsByCategory(category: String): List<Budget> {
         return _budgets.filter { it.category == category }
+    }
+
+    // Contador para notificar clics en el logo (dispara animaciones en pantallas que lo observen)
+    var circleClickCount by mutableStateOf(0)
+        private set
+
+    fun notifyLogoClicked() {
+        circleClickCount++
     }
 }
 

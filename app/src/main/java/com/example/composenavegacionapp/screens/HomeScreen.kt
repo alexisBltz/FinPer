@@ -1,6 +1,7 @@
 package com.example.composenavegacionapp.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,7 +28,8 @@ import com.example.composenavegacionapp.viewmodel.TransactionViewModel
 fun HomeNavHost(
     budgetViewModel: BudgetViewModel,
     transactionViewModel: TransactionViewModel,
-    onNavigateToDetails: (String) -> Unit, 
+    onNavigateToDetails: (String) -> Unit,
+    onLogoClicked: () -> Unit,
     onOpenBudget: () -> Unit
 ) {
     var selectedIndex by remember { mutableStateOf(0) }
@@ -38,8 +40,22 @@ fun HomeNavHost(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "FinPer") },
+                title = {
+                    // Hacemos el título clickable para simular el "logo" y notificar al caller
+                    Row {
+                        Text(
+                            text = "FinPer",
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    // Llamamos al callback específico de logo
+                                    onLogoClicked()
+                                }
+                        )
+                    }
+                },
                 actions = {
+                    // El icono de agregar abre el formulario
                     IconButton(onClick = { onOpenBudget() }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar presupuesto")
                     }

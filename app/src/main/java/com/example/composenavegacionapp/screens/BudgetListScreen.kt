@@ -14,6 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import com.example.composenavegacionapp.data.Budget
 import com.example.composenavegacionapp.viewmodel.BudgetViewModel
 import java.text.NumberFormat
@@ -26,6 +35,8 @@ fun BudgetListScreen(viewModel: BudgetViewModel) {
     var showForm by remember { mutableStateOf(false) }
     val budgets = viewModel.budgets
     val totalBudget = viewModel.getTotalBudget()
+    // Observa el contador de clicks del logo para disparar la animación
+    val circleClicks = viewModel.circleClickCount
 
     Scaffold(
         topBar = {
@@ -61,6 +72,9 @@ fun BudgetListScreen(viewModel: BudgetViewModel) {
                     .padding(padding)
                     .padding(16.dp)
             ) {
+                // Mostrar el círculo animado en la parte superior
+                AnimatedCircle(trigger = circleClicks)
+
                 // Card de resumen total
                 Card(
                     modifier = Modifier
@@ -245,4 +259,52 @@ private fun formatCurrency(amount: Double): String {
 private fun formatDate(timestamp: Long): String {
     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp))
+}
+
+@Composable
+fun AnimatedCircle(trigger: Int) {
+    // Cada vez que `trigger` cambia, alternaremos entre dos tamaños
+    var toggle by remember { mutableStateOf(false) }
+    // Recordamos el último valor de trigger para detectar cambios
+    var lastTrigger by remember { mutableStateOf(trigger) }
+
+    if (trigger != lastTrigger) {
+        lastTrigger = trigger
+        toggle = !toggle
+    }
+
+    val targetScale = if (toggle) 1.5f else 1f
+    val scale by animateFloatAsState(
+        targetValue = targetScale,
+        animationSpec = tween(durationMillis = 450)
+    )
+
+    // Tamaño base en dp
+    val baseSizeDp = 60.dp
+    val density = LocalDensity.current
+    val baseSizePx = with(density) { baseSizeDp.toPx() }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Leer el color fuera del lambda de dibujo (no composable) para evitar usar APIs @Composable dentro
+        val circleColor = MaterialTheme.colorScheme.primary
+
+        Canvas(modifier = Modifier
+            .size(baseSizeDp * scale)
+            .clickable {
+                // permitir también que el usuario presione el círculo para alternar
+            }
+        ) {
+            drawCircle(
+                color = circleColor,
+                radius = (size.minDimension / 2f),
+                center = Offset(size.width / 2f, size.height / 2f),
+                style = Fill
+            )
+        }
+    }
 }
