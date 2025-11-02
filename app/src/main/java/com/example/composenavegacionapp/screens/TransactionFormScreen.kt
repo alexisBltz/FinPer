@@ -19,6 +19,8 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var paymentMethod by remember { mutableStateOf("Efectivo") }
     var icon by remember { mutableStateOf("💵") }
     var isIncome by remember { mutableStateOf(true) }
     var titleError by remember { mutableStateOf<String?>(null) }
@@ -26,12 +28,22 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
 
     val categories = listOf(
         "Ingreso", "Alimentación", "Transporte", "Vivienda", 
-        "Entretenimiento", "Salud", "Educación", "Otros"
+        "Entretenimiento", "Salud", "Educación", "Servicios",
+        "Compras", "Viajes", "Otros"
     )
-    val icons = listOf("💰", "💵", "🥬", "🏠", "⛽", "🎬", "🏥", "📚", "🛒", "💳", "🎯")
+    val icons = listOf(
+        "💰", "💵", "💼", "🥬", "🏠", "⛽", "🎬", "🏥", 
+        "📚", "🛒", "💳", "🎯", "✈️", "🎁", "☕", "🍕"
+    )
+    val paymentMethods = listOf(
+        "Efectivo", "Tarjeta de débito", "Tarjeta de crédito",
+        "Transferencia bancaria", "PayPal", "Pago online", 
+        "Cargo automático", "Tarjeta vinculada"
+    )
     
     var categoryExpanded by remember { mutableStateOf(false) }
     var iconExpanded by remember { mutableStateOf(false) }
+    var paymentExpanded by remember { mutableStateOf(false) }
 
     val isFormValid by remember(title, amount) {
         val okTitle = title.isNotBlank()
@@ -87,7 +99,8 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it; if (titleError != null) titleError = null },
-                label = { Text("Descripción") },
+                label = { Text("Título") },
+                placeholder = { Text("ej: Compra en supermercado") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = titleError != null,
                 singleLine = true
@@ -105,10 +118,12 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
             OutlinedTextField(
                 value = amount,
                 onValueChange = { amount = it; if (amountError != null) amountError = null },
-                label = { Text("Monto (ej. 1000.50)") },
+                label = { Text("Monto") },
+                placeholder = { Text("ej: 1000.50") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = amountError != null,
                 singleLine = true,
+                leadingIcon = { Text("S/", style = MaterialTheme.typography.bodyLarge) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Done
@@ -124,6 +139,18 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Descripción (opcional)") },
+                placeholder = { Text("Detalles adicionales...") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+                maxLines = 3
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // Dropdown de categorías
             ExposedDropdownMenuBox(
                 expanded = categoryExpanded,
@@ -133,6 +160,7 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
                     value = category,
                     onValueChange = { category = it },
                     label = { Text("Categoría") },
+                    placeholder = { Text("Selecciona una categoría") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
@@ -157,33 +185,71 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Dropdown de iconos
-            ExposedDropdownMenuBox(
-                expanded = iconExpanded,
-                onExpandedChange = { iconExpanded = !iconExpanded }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = icon,
-                    onValueChange = { icon = it },
-                    label = { Text("Icono") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(),
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = iconExpanded) },
-                    readOnly = true
-                )
-                ExposedDropdownMenu(
+                // Dropdown de iconos
+                ExposedDropdownMenuBox(
                     expanded = iconExpanded,
-                    onDismissRequest = { iconExpanded = false }
+                    onExpandedChange = { iconExpanded = !iconExpanded },
+                    modifier = Modifier.weight(1f)
                 ) {
-                    icons.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(option, style = MaterialTheme.typography.headlineSmall) },
-                            onClick = {
-                                icon = option
-                                iconExpanded = false
-                            }
-                        )
+                    OutlinedTextField(
+                        value = icon,
+                        onValueChange = { icon = it },
+                        label = { Text("Icono") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = iconExpanded) },
+                        readOnly = true
+                    )
+                    ExposedDropdownMenu(
+                        expanded = iconExpanded,
+                        onDismissRequest = { iconExpanded = false }
+                    ) {
+                        icons.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option, style = MaterialTheme.typography.headlineMedium) },
+                                onClick = {
+                                    icon = option
+                                    iconExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Dropdown de método de pago
+                ExposedDropdownMenuBox(
+                    expanded = paymentExpanded,
+                    onExpandedChange = { paymentExpanded = !paymentExpanded },
+                    modifier = Modifier.weight(1.5f)
+                ) {
+                    OutlinedTextField(
+                        value = paymentMethod,
+                        onValueChange = { paymentMethod = it },
+                        label = { Text("Método de pago") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = paymentExpanded) },
+                        readOnly = true
+                    )
+                    ExposedDropdownMenu(
+                        expanded = paymentExpanded,
+                        onDismissRequest = { paymentExpanded = false }
+                    ) {
+                        paymentMethods.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option) },
+                                onClick = {
+                                    paymentMethod = option
+                                    paymentExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -197,7 +263,7 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
                 Button(
                     onClick = {
                         var ok = true
-                        if (title.isBlank()) { titleError = "Ingrese una descripción"; ok = false }
+                        if (title.isBlank()) { titleError = "Ingrese un título"; ok = false }
                         val amountDouble = try {
                             amount.replace(',', '.').toDouble()
                         } catch (_: Exception) {
@@ -218,10 +284,12 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
                                 amount = amountDouble,
                                 icon = icon,
                                 isPositive = isIncome,
-                                category = category.ifBlank { "Otros" }
+                                category = category.ifBlank { "Otros" },
+                                description = description.trim(),
+                                paymentMethod = paymentMethod
                             )
                             scope.launch {
-                                snackbarHostState.showSnackbar("Transacción guardada")
+                                snackbarHostState.showSnackbar("✅ Transacción guardada exitosamente")
                                 delay(400)
                                 onSave(newTransaction)
                             }
@@ -243,7 +311,7 @@ fun TransactionFormScreen(onSave: (Transaction) -> Unit, onCancel: () -> Unit) {
                 OutlinedButton(
                     onClick = {
                         scope.launch {
-                            snackbarHostState.showSnackbar("Acción cancelada")
+                            snackbarHostState.showSnackbar("❌ Acción cancelada")
                             delay(300)
                             onCancel()
                         }

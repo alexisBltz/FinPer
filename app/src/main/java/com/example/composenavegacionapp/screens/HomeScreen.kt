@@ -34,7 +34,6 @@ fun HomeNavHost(
 ) {
     var selectedIndex by remember { mutableStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -44,13 +43,14 @@ fun HomeNavHost(
                     // Hacemos el título clickable para simular el "logo" y notificar al caller
                     Row {
                         Text(
-                            text = "FinPer",
+                            text = "FinPer 💰",
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
                                     // Llamamos al callback específico de logo
                                     onLogoClicked()
-                                }
+                                },
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 },
@@ -59,11 +59,18 @@ fun HomeNavHost(
                     IconButton(onClick = { onOpenBudget() }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar presupuesto")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ) {
                 NavigationBarItem(
                     selected = selectedIndex == 0,
                     onClick = { selectedIndex = 0 },
@@ -73,13 +80,19 @@ fun HomeNavHost(
                 NavigationBarItem(
                     selected = selectedIndex == 1,
                     onClick = { selectedIndex = 1 },
-                    icon = { Text("💳") },
+                    icon = { Text("💳", style = MaterialTheme.typography.titleLarge) },
                     label = { Text("Transacciones") }
                 )
                 NavigationBarItem(
                     selected = selectedIndex == 2,
                     onClick = { selectedIndex = 2 },
-                    icon = { Text("💰") },
+                    icon = { Text("📊", style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Estadísticas") }
+                )
+                NavigationBarItem(
+                    selected = selectedIndex == 3,
+                    onClick = { selectedIndex = 3 },
+                    icon = { Text("💰", style = MaterialTheme.typography.titleLarge) },
                     label = { Text("Presupuestos") }
                 )
             }
@@ -92,7 +105,8 @@ fun HomeNavHost(
                     viewModel = transactionViewModel,
                     onNavigateToDetails = onNavigateToDetails
                 )
-                2 -> BudgetListScreen(viewModel = budgetViewModel)
+                2 -> StatisticsScreen(viewModel = transactionViewModel)
+                3 -> BudgetListScreen(viewModel = budgetViewModel)
             }
         }
     }
@@ -116,24 +130,7 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = "16:04",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("📶", fontSize = 16.sp)
-                    Text("📶", fontSize = 16.sp)
-                    Text("🔋", fontSize = 16.sp)
-                }
-            }
+            ){}
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -149,8 +146,13 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                    val greeting = when (java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) {
+                        in 0..11 -> "buenos días ☀️"
+                        in 12..18 -> "buenas tardes 🌤️"
+                        else -> "buenas noches 🌙"
+                    }
                     Text(
-                        text = "buenos días",
+                        text = greeting,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                     )
@@ -168,87 +170,149 @@ fun HomeScreen(onNavigateToDetails: (String) -> Unit) {
                     Icon(
                         Icons.Default.Home,
                         contentDescription = "Notificaciones",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Tarjetas de presupuesto (resumidas)
-            Card(
+            // Tarjetas de resumen financiero mejoradas
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                // Card de Balance
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column {
-                            Text(
-                                text = "💰 Presupuesto Total",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = "S/7,783.00",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "💰",
+                            fontSize = 32.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Balance Total",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "S/ 7,783.00",
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
-                        Column {
-                            Text(
-                                text = "💸 Gasto Del Mes",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
-                                fontSize = 14.sp
-                            )
-                            Text(
-                                text = "-S/1,187.40",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                // Card de Gastos
+                Card(
+                    modifier = Modifier.weight(1f),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    shape = RoundedCornerShape(20.dp),
+                    elevation = CardDefaults.cardElevation(6.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "💸",
+                            fontSize = 32.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Gastos del Mes",
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "S/ 1,187.40",
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Lista de transacciones
+            // Título de transacciones recientes
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Transacciones Recientes",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "Ver todas →",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Lista de transacciones mejorada
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 TransactionItem(
                     icon = "💰",
-                    title = "Salario",
-                    subtitle = "18:27 - Abril 30",
-                    amount = "S/4,000.00",
+                    title = "Salario Mensual",
+                    subtitle = "18:27 - Mayo 30",
+                    amount = "S/ 4,500.00",
                     isPositive = true,
-                    color = Color(0xFF64B5F6),
-                    onClick = { onNavigateToDetails("Salario - S/4,000.00") }
+                    color = Color(0xFF4CAF50),
+                    onClick = { onNavigateToDetails("Salario Mensual - S/ 4,500.00") }
                 )
 
                 TransactionItem(
-                    icon = "🥬",
-                    title = "Verduras",
-                    subtitle = "17:00 - Abril 24",
-                    amount = "-S/100.00",
+                    icon = "🛒",
+                    title = "Supermercado",
+                    subtitle = "19:30 - Mayo 27",
+                    amount = "-S/ 385.50",
                     isPositive = false,
-                    color = Color(0xFF42A5F5),
-                    onClick = { onNavigateToDetails("Verduras - -S/100.00") }
+                    color = Color(0xFFE91E63),
+                    onClick = { onNavigateToDetails("Supermercado - -S/ 385.50") }
                 )
 
                 TransactionItem(
                     icon = "🏠",
-                    title = "Renta",
-                    subtitle = "8:30 - Abril 15",
-                    amount = "-S/674.40",
+                    title = "Renta Departamento",
+                    subtitle = "08:30 - Mayo 15",
+                    amount = "-S/ 1,200.00",
                     isPositive = false,
-                    color = Color(0xFF2196F3),
-                    onClick = { onNavigateToDetails("Renta - -S/674.40") }
+                    color = Color(0xFFFF5722),
+                    onClick = { onNavigateToDetails("Renta - -S/ 1,200.00") }
+                )
+                
+                TransactionItem(
+                    icon = "⛽",
+                    title = "Gasolina Premium",
+                    subtitle = "14:20 - Mayo 12",
+                    amount = "-S/ 380.00",
+                    isPositive = false,
+                    color = Color(0xFF9C27B0),
+                    onClick = { onNavigateToDetails("Gasolina - -S/ 380.00") }
                 )
             }
         }
