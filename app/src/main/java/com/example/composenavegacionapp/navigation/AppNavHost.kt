@@ -8,6 +8,7 @@ import com.example.composenavegacionapp.viewmodel.TransactionViewModel
 sealed class Screen {
     object Splash : Screen()
     object Home : Screen()
+    object Settings : Screen()
     data class Details(val data: String) : Screen()
     object BudgetForm : Screen()
 }
@@ -26,8 +27,10 @@ fun AppNavHost(
             transactionViewModel = transactionViewModel,
             onNavigateToDetails = { data -> screen = Screen.Details(data) },
             onLogoClicked = { budgetViewModel.notifyLogoClicked() },
-            onOpenBudget = { screen = Screen.BudgetForm }
+                onOpenBudget = { screen = Screen.BudgetForm },
+                onOpenSettings = { screen = Screen.Settings }
         )
+        is Screen.Settings -> SettingsScreen(onBack = { screen = Screen.Home })
         is Screen.Details -> DetailScreen(data = s.data, onBack = { screen = Screen.Home })
         is Screen.BudgetForm -> BudgetFormScreen(
             onSave = { budget ->

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import kotlinx.coroutines.launch
@@ -30,7 +31,8 @@ fun HomeNavHost(
     transactionViewModel: TransactionViewModel,
     onNavigateToDetails: (String) -> Unit,
     onLogoClicked: () -> Unit,
-    onOpenBudget: () -> Unit
+    onOpenBudget: () -> Unit,
+    onOpenSettings: () -> Unit
 ) {
     var selectedIndex by remember { mutableStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -58,6 +60,10 @@ fun HomeNavHost(
                     // El icono de agregar abre el formulario
                     IconButton(onClick = { onOpenBudget() }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar presupuesto")
+                    }
+                    // Icono de ajustes
+                    IconButton(onClick = { onOpenSettings() }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Ajustes")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
